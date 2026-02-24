@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Force light background for body */
+body {
+  background-color: #f3f4f6; /* gray-100 */
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure root div is also light */
+#root {
+  min-height: 100vh;
+  background-color: #f3f4f6;
+}

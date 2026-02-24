@@ -51,4 +51,4 @@ npm install -D tailwindcss autoprefixer  # Missing postcss, may cause issues
   PostCSS must be explicitly included
   Restart dev server after installation
 
-Based on a tutorial from [Corbado]
+Based on a tutorial from ([Corbado](https://www.corbado.com/blog/react-express-crud-app-postgresql))

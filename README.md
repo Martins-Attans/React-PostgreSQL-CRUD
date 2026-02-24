@@ -6,18 +6,17 @@ A full-stack CRUD application for managing tutorials built with PostgreSQL, Expr
 
 ## Features
 
- Create, read, update, and delete tutorials
-  Search tutorials by title
-  Publish/unpublish status
-  
+- Create, read, update, and delete tutorials
+- Search tutorials by title
+- Publish/unpublish status
 
 ### CUSTOM ADDITIONS
 
-  Tutorial count feature - Shows number of loaded tutorials
-  Search validation with error messages
-  "No results found" feedback
-  Clear search button
-  Remove All validation - Prompts user when trying to delete from an empty list
+- Tutorial count feature - Shows number of loaded tutorials
+- Search validation with error messages
+- "No results found" feedback
+- Clear search button
+- Remove All validation - Prompts user when trying to delete from an empty list
 
 ## Tech Stack
 

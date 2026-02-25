@@ -22,8 +22,13 @@ function TutorialsList() {
     const retrieveTutorials = () => {
         tutorialService.getAll()
             .then((response) => {
-                setTutorials(response.data);
-                console.log(response.data);
+                // ensure each tutorial has an `id` field (backend returns `id` instead of `_id`)
+                const list = response.data.map((t) => ({
+                    ...t,
+                    id: t.id || t._id || null,
+                }));
+                setTutorials(list);
+                console.log(list);
             })
             .catch((e) => {
                 console.log(e);
@@ -37,7 +42,12 @@ function TutorialsList() {
     };
 
     const setActiveTutorial = (tutorial, index) => {
-        setCurrentTutorial(tutorial);
+        // if the object lacks `id` but has `_id`, normalize it
+        const normalized = {
+            ...tutorial,
+            id: tutorial.id || tutorial._id || null,
+        };
+        setCurrentTutorial(normalized);
         setCurrentIndex(index);
     };
 
@@ -72,21 +82,27 @@ function TutorialsList() {
         return;
     }
     
-    // Clear error if valid
+    // Clear previous error
     setSearchError("");
     
     tutorialService.findByTitle(searchTitle)
         .then((response) => {
-            setTutorials(response.data);
+            const results = response.data;
+            setTutorials(results);
             setCurrentTutorial(null);
             setCurrentIndex(-1);
             
-            // Show message if no results found
-            if (response.data.length === 0) {
-                setSearchError(`No tutorials found with title "${searchTitle}"`);
+            // Show message when no results
+            if (results.length === 0) {
+                if (tutorials.length === 0) {
+                    // nothing exists at all yet
+                    setSearchError("No tutorials added yet");
+                } else {
+                    setSearchError(`No tutorials found with title "${searchTitle}"`);
+                }
             }
             
-            console.log(response.data);
+            console.log(results);
         })
         .catch((e) => {
             console.log(e);
@@ -136,18 +152,30 @@ function TutorialsList() {
                 <p className="text-sm mb-2">Loaded {tutorials.length} tutorials</p>
                 <ul className="divide-y divide-gray-200 border border-gray-200 rounded">
                     {tutorials &&
-                        tutorials.map((tutorial, index) => (
-                            <li
-                                className={
-                                    "px-4 py-2 cursor-pointer " +
-                                    (index === currentIndex ? "bg-blue-100" : "")
-                                }
-                                onClick={() => setActiveTutorial(tutorial, index)}
-                                key={tutorial._id}
-                            >
-                                {tutorial.title}
-                            </li>
-                        ))}
+                        tutorials.map((tutorial, index) => {
+                            const match =
+                                searchTitle &&
+                                tutorial.title
+                                    .toLowerCase()
+                                    .includes(searchTitle.toLowerCase());
+
+                            return (
+                                <li
+                                    className={
+                                        "px-4 py-2 cursor-pointer " +
+                                        (index === currentIndex
+                                            ? "bg-blue-100"
+                                            : match
+                                            ? "bg-yellow-50"
+                                            : "")
+                                    }
+                                    onClick={() => setActiveTutorial(tutorial, index)}
+                                    key={tutorial.id}
+                                >
+                                    {tutorial.title}
+                                </li>
+                            );
+                        })}
                 </ul>
 
                 <button
@@ -177,7 +205,7 @@ function TutorialsList() {
                         </div>
 
                         <Link
-                            to={`/tutorials/${currentTutorial._id}`}
+                            to={`/tutorials/${currentTutorial.id}`}
                             className="inline-block bg-yellow-400 text-black px-3 py-1 rounded"
                         >
                             Edit

@@ -42,6 +42,16 @@ npm install -D tailwindcss@3.4.1 postcss autoprefixer
 ```bash
 npm install -D tailwindcss autoprefixer  # Missing postcss, may cause issues
 ```
+Frontend behaviour
+
+- IDs returned from the API may be either id or _id. The UI normalizes
+  both so components always work with id.
+- Tutorials cannot be published until both title and description are filled in;
+  the “Publish” button is disabled and the user is shown an explanatory tooltip
+  or error message.
+- Search bar requires non‑empty input. If the database is empty the search
+  control reports “No tutorials added yet”; otherwise it reports “No tutorials
+  found” when there are no matches.
 
 ## Troubleshooting
 

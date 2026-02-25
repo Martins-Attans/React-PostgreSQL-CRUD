@@ -13,8 +13,14 @@ function Tutorial() {
         published: false,
     });
     const [message, setMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
  
     const getTutorial = (id) => {
+        // ignore clearly invalid route parameters
+        if (!id || id === "null" || id === "undefined") {
+            console.warn("getTutorial called with invalid id", id);
+            return;
+        }
         TutorialService.get(id)
             .then((response) => {
                 setCurrentTutorial(response.data);
@@ -32,14 +38,35 @@ function Tutorial() {
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         setCurrentTutorial({ ...currentTutorial, [name]: value });
+        // clear any previous feedback messages while user is editing
+        if (message) setMessage("");
+        if (errorMessage) setErrorMessage("");
     };
  
+    // convenience flag used in several places
+    const isValid =
+        currentTutorial.title &&
+        currentTutorial.title.trim() !== "" &&
+        currentTutorial.description &&
+        currentTutorial.description.trim() !== "";
+
     const updatePublished = (status) => {
+        if (status === true && !isValid) {
+            // trying to publish but title/description missing
+            setErrorMessage("Cannot publish until title and description are provided");
+            return;
+        }
+
         const data = {
             ...currentTutorial,
             published: status,
         };
- 
+
+        if (!currentTutorial.id) {
+            console.warn("Attempt to update published state without id","", currentTutorial);
+            return;
+        }
+
         TutorialService.update(currentTutorial.id, data)
             .then((response) => {
                 setCurrentTutorial({ ...currentTutorial, published: status });
@@ -51,6 +78,23 @@ function Tutorial() {
     };
  
     const updateTutorial = () => {
+        if (!currentTutorial.id) {
+            console.warn("Attempt to update tutorial without id", currentTutorial);
+            return;
+        }
+
+        // basic client-side validation
+        if (!currentTutorial.title || currentTutorial.title.trim() === "") {
+            setErrorMessage("Title cannot be empty");
+            return;
+        }
+        if (!currentTutorial.description || currentTutorial.description.trim() === "") {
+            setErrorMessage("Description cannot be empty");
+            return;
+        }
+
+        setErrorMessage("");
+
         TutorialService.update(currentTutorial.id, currentTutorial)
             .then((response) => {
                 console.log(response.data);
@@ -58,10 +102,17 @@ function Tutorial() {
             })
             .catch((e) => {
                 console.log(e);
+                if (e.response && e.response.data && e.response.data.message) {
+                    setErrorMessage(e.response.data.message);
+                }
             });
     };
  
     const deleteTutorial = () => {
+        if (!currentTutorial.id) {
+            console.warn("Attempt to delete tutorial without id", currentTutorial);
+            return;
+        }
         TutorialService.remove(currentTutorial.id)
             .then((response) => {
                 console.log(response.data);
@@ -122,6 +173,12 @@ function Tutorial() {
                             <button
                                 className="bg-blue-500 text-white px-3 py-1 rounded"
                                 onClick={() => updatePublished(true)}
+                                disabled={!isValid}
+                                title={
+                                    !isValid
+                                        ? "Enter title and description before publishing"
+                                        : undefined
+                                }
                             >
                                 Publish
                             </button>
@@ -140,6 +197,9 @@ function Tutorial() {
                         >
                             Update
                         </button>
+                        {errorMessage && (
+                            <p className="text-red-600 text-sm mt-2">{errorMessage}</p>
+                        )}
                     </div>
  
                     {message && <p className="text-green-600 mt-2">{message}</p>}

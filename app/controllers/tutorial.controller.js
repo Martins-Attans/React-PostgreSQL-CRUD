@@ -37,7 +37,7 @@ export const create = (req, res) => {
 export const findAll = (req, res) => {
     // Allow a filter condition via query parameter
     const title = req.query.title;
-    const condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
+    const condition = title ? { title: { [Op.iLike]: `%${title}%` } } : null;
  
     Tutorial.findAll({ where: condition })
         .then((data) => {
